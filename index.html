@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX ATHLETICS | Ultra-Premium Fitness & Performance Club</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome & Lucide Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- GSAP Animations Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Custom Tailwind Styling Extensions -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#08080A',
+                            dark: '#0F0F13',
+                            card: '#16161D',
+                            border: '#262632',
+                            volt: '#CCFF00',
+                            orange: '#FF5500',
+                            cyan: '#00F0FF',
+                            pink: '#FF0055'
+                        }
+                    },
+                    fontFamily: {
+                        impact: ['Teko', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2.5s infinite alternate',
+                        'float': 'float 4s ease-in-out infinite',
+                        'wave-bar': 'wave 1.2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%': { boxShadow: '0 0 15px rgba(204, 255, 0, 0.2)' },
+                            '100%': { boxShadow: '0 0 35px rgba(204, 255, 0, 0.6)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        wave: {
+                            '0%': { height: '15%' },
+                            '100%': { height: '100%' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Glowing & Glassmorphism Utilities */
+        body {
+            background-color: #08080A;
+            color: #E2E8F0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(22, 22, 29, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-panel-glow {
+            background: rgba(22, 22, 29, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(204, 255, 0, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .text-glow-volt {
+            text-shadow: 0 0 20px rgba(204, 255, 0, 0.5);
+        }
+
+        .text-glow-orange {
+            text-shadow: 0 0 20px rgba(255, 85, 0, 0.5);
+        }
+
+        .gradient-border-btn {
+            position: relative;
+            background: linear-gradient(135deg, #CCFF00, #FF5500);
+            padding: 1px;
+            border-radius: 9999px;
+        }
+
+        .btn-inner {
+            background: #08080A;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+        }
+
+        .gradient-border-btn:hover .btn-inner {
+            background: transparent;
+            color: #08080A;
+            font-weight: 800;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #08080A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262632;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #CCFF00;
+        }
+
+        /* Before & After Image Slider Handle */
+        .before-after-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #CCFF00;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(204, 255, 0, 0.8);
+            border: 3px solid #08080A;
+        }
+
+        /* Gauge meter animations */
+        .meter-bar {
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="selection:bg-brand-volt selection:text-black">
+
+    <!-- Interactive Background Canvas Particles -->
+    <canvas id="hero-canvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0 opacity-40"></canvas>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 py-4" id="main-nav">
+        <div class="max-w-7xl mx-mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-panel rounded-full px-6 py-3 flex items-center justify-between border border-white/10 shadow-2xl">
+                <!-- Brand Logo -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-brand-volt flex items-center justify-center text-black font-impact text-2xl font-extrabold rotate-3 group-hover:rotate-12 transition-transform shadow-[0_0_20px_rgba(204,255,0,0.5)]">
+                        A
+                    </div>
+                    <span class="font-impact text-3xl tracking-wider text-white">APEX <span class="text-brand-volt">ATHLETICS</span></span>
+                </a>
+
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center gap-8 font-semibold text-sm tracking-wide text-gray-300">
+                    <a href="#hero" class="hover:text-brand-volt transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-brand-volt hover:after:w-full after:transition-all">HOME</a>
+                    <a href="#schedule" class="hover:text-brand-volt transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-brand-volt hover:after:w-full after:transition-all">SCHEDULE</a>
+                    <a href="#bmi" class="hover:text-brand-volt transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-brand-volt hover:after:w-full after:transition-all">BMI LAB</a>
+                    <a href="#trainers" class="hover:text-brand-volt transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-brand-volt hover:after:w-full after:transition-all">TRAINERS</a>
+                    <a href="#macros" class="hover:text-brand-volt transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-brand-volt hover:after:w-full after:transition-all">MACROS</a>
+                    <a href="#membership" class="hover:text-brand-volt transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-brand-volt hover:after:w-full after:transition-all">PLANS</a>
+                </div>
+
+                <!-- Right Actions: Audio Widget & CTA -->
+                <div class="flex items-center gap-4">
+                    <!-- Audio Hype Player Toggle -->
+                    <button id="audio-toggle" class="glass-panel px-3 py-2 rounded-full flex items-center gap-2 text-xs font-bold text-gray-300 hover:border-brand-volt hover:text-brand-volt transition-all" title="Toggle Workout Atmosphere Audio">
+                        <i data-lucide="volume-2" class="w-4 h-4 text-brand-volt"></i>
+                        <div class="hidden sm:flex items-center gap-0.5 h-3">
+                            <span class="w-1 bg-brand-volt rounded-full animate-wave-bar" style="animation-delay: 0.1s"></span>
+                            <span class="w-1 bg-brand-volt rounded-full animate-wave-bar" style="animation-delay: 0.3s"></span>
+                            <span class="w-1 bg-brand-volt rounded-full animate-wave-bar" style="animation-delay: 0.2s"></span>
+                            <span class="w-1 bg-brand-volt rounded-full animate-wave-bar" style="animation-delay: 0.4s"></span>
+                        </div>
+                        <span id="audio-status-text" class="hidden sm:inline">HYPE: OFF</span>
+                    </button>
+
+                    <!-- Join CTA Button -->
+                    <a href="#membership" class="hidden sm:inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-brand-volt text-black font-extrabold text-xs tracking-wider uppercase hover:bg-white hover:shadow-[0_0_25px_rgba(204,255,0,0.8)] transition-all transform hover:-translate-y-0.5">
+                        CLAIM PASS
+                    </a>
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-300 hover:text-white">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Menu -->
+        <div id="mobile-menu" class="hidden md:hidden glass-panel-glow mx-4 mt-3 rounded-2xl p-6 border border-white/10 flex-col gap-4 text-center font-bold text-lg">
+            <a href="#hero" class="py-2 hover:text-brand-volt transition-colors mobile-link">HOME</a>
+            <a href="#schedule" class="py-2 hover:text-brand-volt transition-colors mobile-link">SCHEDULE</a>
+            <a href="#bmi" class="py-2 hover:text-brand-volt transition-colors mobile-link">BMI LAB</a>
+            <a href="#trainers" class="py-2 hover:text-brand-volt transition-colors mobile-link">TRAINERS</a>
+            <a href="#macros" class="py-2 hover:text-brand-volt transition-colors mobile-link">MACRO PLANNER</a>
+            <a href="#membership" class="py-2 hover:text-brand-volt transition-colors mobile-link">MEMBERSHIP</a>
+            <a href="#membership" class="w-full py-3 bg-brand-volt text-black rounded-xl font-extrabold text-sm tracking-widest uppercase">JOIN NOW</a>
+        </div>
+    </nav>
+
+    <!-- SECTION 1: DYNAMIC HERO SECTION -->
+    <section id="hero" class="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
+        <!-- Glowing Orbs Background -->
+        <div class="absolute top-1/4 left-10 w-96 h-96 bg-brand-volt/15 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-brand-orange/15 rounded-full blur-[140px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full text-center">
+            
+            <!-- Floating Badge Tag -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-brand-volt/30 mb-8 animate-float">
+                <span class="w-2 h-2 rounded-full bg-brand-volt animate-ping"></span>
+                <span class="text-xs font-extrabold tracking-widest text-brand-volt uppercase">THE NEXT GEN HUMAN PERFORMANCE HUB</span>
+            </div>
+
+            <!-- Main High Impact Title -->
+            <h1 class="font-impact text-6xl sm:text-8xl lg:text-9xl leading-none uppercase tracking-tight text-white mb-6">
+                FORGE YOUR <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-volt via-white to-brand-orange text-glow-volt">LETHAL</span> PHYSICALITY
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="max-w-3xl mx-auto text-base sm:text-xl text-gray-400 mb-10 font-normal leading-relaxed">
+                Experience ultra-elite strength facilities, biometric performance analytics, and Olympic-grade coaching. Stop settling for average. Dominate your genetic ceiling.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-5 mb-16">
+                <a href="#membership" class="w-full sm:w-auto px-8 py-4 rounded-full bg-brand-volt text-black font-extrabold text-sm tracking-widest uppercase hover:bg-white hover:shadow-[0_0_35px_rgba(204,255,0,0.8)] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 group">
+                    <span>START TRANSFORMATION</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+
+                <a href="#schedule" class="w-full sm:w-auto px-8 py-4 rounded-full glass-panel text-white font-extrabold text-sm tracking-widest uppercase hover:border-brand-volt hover:text-brand-volt transition-all flex items-center justify-center gap-3">
+                    <i data-lucide="calendar" class="w-5 h-5 text-brand-volt"></i>
+                    <span>VIEW LIVE CLASSES</span>
+                </a>
+            </div>
+
+            <!-- Hero Live Stats Counter Bar -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+                <div class="glass-panel p-6 rounded-2xl border border-white/5 hover:border-brand-volt/40 transition-all text-center">
+                    <div class="font-impact text-4xl sm:text-5xl text-brand-volt mb-1 counter" data-target="3500">0</div>
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">ACTIVE ATHLETES</div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-white/5 hover:border-brand-volt/40 transition-all text-center">
+                    <div class="font-impact text-4xl sm:text-5xl text-brand-orange mb-1 counter" data-target="48">0</div>
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">MASTER COACHES</div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-white/5 hover:border-brand-volt/40 transition-all text-center">
+                    <div class="font-impact text-4xl sm:text-5xl text-brand-cyan mb-1 counter" data-target="99.4">0</div>
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">GOAL SUCCESS RATE %</div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-white/5 hover:border-brand-volt/40 transition-all text-center">
+                    <div class="font-impact text-4xl sm:text-5xl text-white mb-1">24 / 7</div>
+                    <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">BIOMETRIC ACCESS</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 2: INTERACTIVE BMI & METABOLIC ESTIMATOR LAB -->
+    <section id="bmi" class="py-24 relative z-10 border-t border-white/5 bg-brand-dark/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-brand-volt text-xs font-extrabold uppercase tracking-widest mb-2 block">BIOMETRIC ANALYTICS</span>
+                <h2 class="font-impact text-5xl sm:text-7xl uppercase tracking-tight text-white">INTERACTIVE <span class="text-brand-volt">BMI LAB</span></h2>
+                <p class="text-gray-400 text-sm sm:text-base mt-2">Calculate your Body Mass Index, recommended caloric threshold, and customized hydration requirements in real-time.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <!-- Sliders Controls Column -->
+                <div class="lg:col-span-7 glass-panel p-8 sm:p-10 rounded-3xl border border-white/10 space-y-8">
+                    
+                    <!-- Height Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="text-sm font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
+                                <i data-lucide="ruler" class="w-4 h-4 text-brand-volt"></i>
+                                <span>HEIGHT</span>
+                            </label>
+                            <span class="font-impact text-3xl text-brand-volt"><span id="height-val">178</span> <span class="text-sm text-gray-400 font-sans">cm</span></span>
+                        </div>
+                        <input type="range" id="slider-height" min="130" max="220" value="178" class="w-full h-2 bg-brand-card rounded-lg appearance-none cursor-pointer accent-brand-volt">
+                    </div>
+
+                    <!-- Weight Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="text-sm font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
+                                <i data-lucide="weight" class="w-4 h-4 text-brand-orange"></i>
+                                <span>WEIGHT</span>
+                            </label>
+                            <span class="font-impact text-3xl text-brand-orange"><span id="weight-val">76</span> <span class="text-sm text-gray-400 font-sans">kg</span></span>
+                        </div>
+                        <input type="range" id="slider-weight" min="40" max="160" value="76" class="w-full h-2 bg-brand-card rounded-lg appearance-none cursor-pointer accent-brand-orange">
+                    </div>
+
+                    <!-- Age Slider -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="text-sm font-bold uppercase tracking-wider text-gray-300 flex items-center gap-2">
+                                <i data-lucide="user" class="w-4 h-4 text-brand-cyan"></i>
+                                <span>AGE</span>
+                            </label>
+                            <span class="font-impact text-3xl text-brand-cyan"><span id="age-val">25</span> <span class="text-sm text-gray-400 font-sans">years</span></span>
+                        </div>
+                        <input type="range" id="slider-age" min="16" max="80" value="25" class="w-full h-2 bg-brand-card rounded-lg appearance-none cursor-pointer accent-brand-cyan">
+                    </div>
+
+                    <!-- Activity Level Select Buttons -->
+                    <div>
+                        <label class="text-sm font-bold uppercase tracking-wider text-gray-300 block mb-3">INTENSITY PROTOCOL</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button class="activity-btn active border border-brand-volt bg-brand-volt/10 text-brand-volt p-3 rounded-xl font-bold text-xs uppercase" data-factor="1.2">LIGHT</button>
+                            <button class="activity-btn border border-white/10 text-gray-400 p-3 rounded-xl font-bold text-xs uppercase hover:border-white/30" data-factor="1.55">ATHLETE</button>
+                            <button class="activity-btn border border-white/10 text-gray-400 p-3 rounded-xl font-bold text-xs uppercase hover:border-white/30" data-factor="1.9">PRO BEAST</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- BMI Result Gauge Column -->
+                <div class="lg:col-span-5 glass-panel-glow p-8 sm:p-10 rounded-3xl text-center relative overflow-hidden flex flex-col justify-between h-full border border-brand-volt/30">
+                    <div>
+                        <span class="text-xs font-extrabold uppercase tracking-widest text-gray-400 block mb-2">YOUR BIOMETRIC SCORE</span>
+                        <div class="font-impact text-8xl text-brand-volt mb-2 leading-none" id="bmi-score">24.0</div>
+                        <div id="bmi-category" class="inline-block px-4 py-1.5 rounded-full bg-brand-volt/20 text-brand-volt text-sm font-extrabold uppercase tracking-wider mb-6">
+                            HEALTHY WEIGHT
+                        </div>
+
+                        <!-- Gauge Visualizer Bar -->
+                        <div class="w-full bg-brand-card h-4 rounded-full overflow-hidden p-0.5 border border-white/10 mb-6 relative">
+                            <div id="bmi-gauge" class="meter-bar h-full bg-gradient-to-r from-brand-cyan via-brand-volt to-brand-orange rounded-full" style="width: 45%;"></div>
+                        </div>
+
+                        <p id="bmi-advice" class="text-xs sm:text-sm text-gray-300 leading-relaxed mb-6 font-medium">
+                            Your ratio indicates optimal athletic baseline conditioning. Ideal for building lean muscle mass and high-intensity metabolic conditioning.
+                        </p>
+                    </div>
+
+                    <!-- Recommended Metrics Grid -->
+                    <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
+                        <div class="text-left bg-black/40 p-4 rounded-2xl border border-white/5">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1">CALORIC INTAKE</span>
+                            <span id="target-calories" class="font-impact text-2xl text-white">2,450 <span class="text-xs font-sans text-brand-volt">kcal/day</span></span>
+                        </div>
+                        <div class="text-left bg-black/40 p-4 rounded-2xl border border-white/5">
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1">HYDRATION TARGET</span>
+                            <span id="target-water" class="font-impact text-2xl text-white">3.2 <span class="text-xs font-sans text-brand-cyan">Liters/day</span></span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 3: INTERACTIVE WEEKLY CLASS SCHEDULE & RESERVATION -->
+    <section id="schedule" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+                <div>
+                    <span class="text-brand-volt text-xs font-extrabold uppercase tracking-widest mb-2 block">TRAINING TIMETABLE</span>
+                    <h2 class="font-impact text-5xl sm:text-7xl uppercase tracking-tight text-white">CLASS <span class="text-brand-orange">SCHEDULE</span></h2>
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex flex-wrap gap-2" id="category-filters">
+                    <button class="cat-filter-btn active px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider bg-brand-volt text-black transition-all" data-cat="all">ALL CLASSES</button>
+                    <button class="cat-filter-btn px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider glass-panel text-gray-300 hover:text-white transition-all" data-cat="hiit">HIIT & CARDIO</button>
+                    <button class="cat-filter-btn px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider glass-panel text-gray-300 hover:text-white transition-all" data-cat="power">POWERLIFTING</button>
+                    <button class="cat-filter-btn px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider glass-panel text-gray-300 hover:text-white transition-all" data-cat="boxing">BOXING PROTOCOL</button>
+                </div>
+            </div>
+
+            <!-- Day Selector Tabs -->
+            <div class="flex overflow-x-auto gap-3 pb-4 mb-8 border-b border-white/10 no-scrollbar" id="day-tabs">
+                <button class="day-tab active px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card border border-brand-volt text-brand-volt flex-shrink-0" data-day="mon">MON</button>
+                <button class="day-tab px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card/50 border border-white/5 text-gray-400 hover:text-white flex-shrink-0" data-day="tue">TUE</button>
+                <button class="day-tab px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card/50 border border-white/5 text-gray-400 hover:text-white flex-shrink-0" data-day="wed">WED</button>
+                <button class="day-tab px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card/50 border border-white/5 text-gray-400 hover:text-white flex-shrink-0" data-day="thu">THU</button>
+                <button class="day-tab px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card/50 border border-white/5 text-gray-400 hover:text-white flex-shrink-0" data-day="fri">FRI</button>
+                <button class="day-tab px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card/50 border border-white/5 text-gray-400 hover:text-white flex-shrink-0" data-day="sat">SAT</button>
+            </div>
+
+            <!-- Class Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="schedule-grid">
+                <!-- Dynamically populated via JavaScript -->
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 4: INTERACTIVE TRAINER SHOWCASE (3D TILT CARDS) -->
+    <section id="trainers" class="py-24 relative z-10 bg-brand-dark/50 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-brand-volt text-xs font-extrabold uppercase tracking-widest mb-2 block">THE MASTERMINDS</span>
+                <h2 class="font-impact text-5xl sm:text-7xl uppercase tracking-tight text-white">WORLD CLASS <span class="text-brand-volt">COACHES</span></h2>
+                <p class="text-gray-400 text-sm sm:text-base mt-2">World-champion athletes and elite biomechanics experts dedicated to building your strongest physique.</p>
+            </div>
+
+            <!-- Trainers Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Trainer Card 1 -->
+                <div class="trainer-card glass-panel rounded-3xl overflow-hidden border border-white/10 group hover:border-brand-volt transition-all duration-500">
+                    <div class="relative h-96 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&w=800&q=80" alt="Marcus Vance" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent opacity-90"></div>
+                        <span class="absolute top-4 right-4 bg-brand-volt text-black text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-widest">POWER & CONDITIONING</span>
+                    </div>
+                    <div class="p-6 relative -mt-12">
+                        <h3 class="font-impact text-3xl text-white tracking-wide">MARCUS "TITAN" VANCE</h3>
+                        <p class="text-brand-volt text-xs font-bold uppercase tracking-widest mb-3">HEAD POWERLIFTING COACH</p>
+                        <p class="text-gray-400 text-xs leading-relaxed mb-6">Former Olympia powerlifting finalist specializing in raw strength development and structural hypertrophy.</p>
+                        <button onclick="openTrainerModal('Marcus Vance', 'Head Powerlifting Coach', '8+ Years Olympia Prep', 'https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&w=800&q=80')" class="w-full py-3 rounded-xl bg-brand-card hover:bg-brand-volt hover:text-black border border-white/10 font-extrabold text-xs tracking-wider uppercase transition-all">
+                            VIEW PROFILE & SCHEDULE
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trainer Card 2 -->
+                <div class="trainer-card glass-panel rounded-3xl overflow-hidden border border-white/10 group hover:border-brand-orange transition-all duration-500">
+                    <div class="relative h-96 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Elena Rostova" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent opacity-90"></div>
+                        <span class="absolute top-4 right-4 bg-brand-orange text-black text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-widest">HIIT & MOBILITY</span>
+                    </div>
+                    <div class="p-6 relative -mt-12">
+                        <h3 class="font-impact text-3xl text-white tracking-wide">ELENA ROSTOVA</h3>
+                        <p class="text-brand-orange text-xs font-bold uppercase tracking-widest mb-3">METABOLIC CONDITIONING LEAD</p>
+                        <p class="text-gray-400 text-xs leading-relaxed mb-6">Biomechanics specialist obsessed with fat loss optimization, athletic agility, and joint longevity.</p>
+                        <button onclick="openTrainerModal('Elena Rostova', 'Metabolic Lead', 'Biomechanical Master', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80')" class="w-full py-3 rounded-xl bg-brand-card hover:bg-brand-orange hover:text-black border border-white/10 font-extrabold text-xs tracking-wider uppercase transition-all">
+                            VIEW PROFILE & SCHEDULE
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trainer Card 3 -->
+                <div class="trainer-card glass-panel rounded-3xl overflow-hidden border border-white/10 group hover:border-brand-cyan transition-all duration-500">
+                    <div class="relative h-96 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&q=80" alt="Jaxson Croft" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-black via-transparent to-transparent opacity-90"></div>
+                        <span class="absolute top-4 right-4 bg-brand-cyan text-black text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-widest">BOXING PROTOCOL</span>
+                    </div>
+                    <div class="p-6 relative -mt-12">
+                        <h3 class="font-impact text-3xl text-white tracking-wide">JAXSON "STRIKER" CROFT</h3>
+                        <p class="text-brand-cyan text-xs font-bold uppercase tracking-widest mb-3">STRIKING & COMBAT COACH</p>
+                        <p class="text-gray-400 text-xs leading-relaxed mb-6">Golden Gloves champion delivering explosive combat conditioning, reflex enhancement, and stamina training.</p>
+                        <button onclick="openTrainerModal('Jaxson Croft', 'Combat Specialist', 'Golden Gloves Champ', 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800&q=80')" class="w-full py-3 rounded-xl bg-brand-card hover:bg-brand-cyan hover:text-black border border-white/10 font-extrabold text-xs tracking-wider uppercase transition-all">
+                            VIEW PROFILE & SCHEDULE
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 5: INTERACTIVE MACRO & NUTRITION PLANNER WIDGET -->
+    <section id="macros" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                <div class="lg:col-span-5">
+                    <span class="text-brand-volt text-xs font-extrabold uppercase tracking-widest mb-2 block">FUEL YOUR MACHINE</span>
+                    <h2 class="font-impact text-5xl sm:text-7xl uppercase tracking-tight text-white mb-6">MACRO & NUTRITION <span class="text-brand-volt">PLANNER</span></h2>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-8">
+                        Workouts build the impulse; nutrition builds the muscle. Select your target athletic goal to immediately visualize your precise daily macronutrient split ratios.
+                    </p>
+
+                    <!-- Goal Selector Tabs -->
+                    <div class="space-y-3" id="macro-goal-selector">
+                        <button class="macro-goal-btn active w-full p-4 rounded-2xl glass-panel border border-brand-volt text-left flex items-center justify-between" data-goal="muscle">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-brand-volt/10 text-brand-volt flex items-center justify-center font-bold">
+                                    <i data-lucide="biceps-flexed" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-sm text-white uppercase">HYPERTROPHY & MUSCLE GAIN</div>
+                                    <div class="text-xs text-gray-400">High protein, moderate carb surplus</div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-brand-volt"></i>
+                        </button>
+
+                        <button class="macro-goal-btn w-full p-4 rounded-2xl glass-panel border border-white/5 text-left flex items-center justify-between hover:border-white/20" data-goal="shred">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-brand-orange/10 text-brand-orange flex items-center justify-center font-bold">
+                                    <i data-lucide="flame" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-sm text-white uppercase">FAT LOSS & SHRED</div>
+                                    <div class="text-xs text-gray-400">High protein, low carb caloric deficit</div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                        </button>
+
+                        <button class="macro-goal-btn w-full p-4 rounded-2xl glass-panel border border-white/5 text-left flex items-center justify-between hover:border-white/20" data-goal="endurance">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center font-bold">
+                                    <i data-lucide="zap" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-sm text-white uppercase">ENDURANCE & STAMINA</div>
+                                    <div class="text-xs text-gray-400">High carb glycogen replenishment</div>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Interactive Macro Visualization Chart/Cards -->
+                <div class="lg:col-span-7 glass-panel-glow p-8 sm:p-10 rounded-3xl border border-brand-volt/30">
+                    <h3 class="font-impact text-3xl text-white mb-6 uppercase tracking-wider">TARGET MACRONUTRIENT RATIOS</h3>
+
+                    <!-- Visual Progress Stack -->
+                    <div class="h-6 w-full bg-brand-card rounded-full overflow-hidden flex p-1 gap-1 mb-8">
+                        <div id="bar-protein" class="h-full bg-brand-volt rounded-full transition-all duration-700" style="width: 40%"></div>
+                        <div id="bar-carbs" class="h-full bg-brand-cyan rounded-full transition-all duration-700" style="width: 40%"></div>
+                        <div id="bar-fats" class="h-full bg-brand-orange rounded-full transition-all duration-700" style="width: 20%"></div>
+                    </div>
+
+                    <!-- Macro Cards Details -->
+                    <div class="grid grid-cols-3 gap-4 mb-8">
+                        <div class="bg-black/50 p-4 rounded-2xl border border-brand-volt/30 text-center">
+                            <span class="text-xs text-brand-volt font-bold uppercase block mb-1">PROTEIN</span>
+                            <span id="val-protein" class="font-impact text-4xl text-white">40%</span>
+                            <span id="gram-protein" class="text-xs text-gray-400 block font-semibold">220g / day</span>
+                        </div>
+                        <div class="bg-black/50 p-4 rounded-2xl border border-brand-cyan/30 text-center">
+                            <span class="text-xs text-brand-cyan font-bold uppercase block mb-1">CARBS</span>
+                            <span id="val-carbs" class="font-impact text-4xl text-white">40%</span>
+                            <span id="gram-carbs" class="text-xs text-gray-400 block font-semibold">220g / day</span>
+                        </div>
+                        <div class="bg-black/50 p-4 rounded-2xl border border-brand-orange/30 text-center">
+                            <span class="text-xs text-brand-orange font-bold uppercase block mb-1">FATS</span>
+                            <span id="val-fats" class="font-impact text-4xl text-white">20%</span>
+                            <span id="gram-fats" class="text-xs text-gray-400 block font-semibold">50g / day</span>
+                        </div>
+                    </div>
+
+                    <button onclick="showToast('Macro Plan Saved! Check your inbox for custom meal list.', 'success')" class="w-full py-4 rounded-2xl bg-brand-volt text-black font-extrabold text-xs tracking-widest uppercase hover:bg-white transition-all">
+                        GENERATE FULL MEAL PROTOCOL PDF
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 6: BEFORE & AFTER TRANSFORMATION INTERACTIVE SLIDER -->
+    <section class="py-24 relative z-10 bg-brand-dark/50 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-brand-volt text-xs font-extrabold uppercase tracking-widest mb-2 block">PROOF OF WORK</span>
+                <h2 class="font-impact text-5xl sm:text-7xl uppercase tracking-tight text-white">REAL <span class="text-brand-volt">TRANSFORMATIONS</span></h2>
+                <p class="text-gray-400 text-sm sm:text-base mt-2">Drag the interactive slider below to reveal the 12-week metamorphosis of our athletes.</p>
+            </div>
+
+            <div class="max-w-4xl mx-auto glass-panel p-4 rounded-3xl border border-white/10">
+                <div class="relative w-full h-[450px] sm:h-[550px] rounded-2xl overflow-hidden before-after-slider select-none">
+                    
+                    <!-- After Image (Background Base) -->
+                    <img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1200&q=80" alt="After Transformation" class="absolute inset-0 w-full h-full object-cover">
+                    <span class="absolute top-6 right-6 bg-brand-volt text-black text-xs font-extrabold px-4 py-1.5 rounded-full tracking-widest z-10">WEEK 12 (AFTER)</span>
+
+                    <!-- Before Image (Clipped Overlay) -->
+                    <div id="before-image-wrap" class="absolute top-0 left-0 bottom-0 w-1/2 overflow-hidden z-10 border-r-2 border-brand-volt shadow-2xl">
+                        <img src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1200&q=80" alt="Before Transformation" class="absolute top-0 left-0 max-w-none h-full w-full object-cover">
+                        <span class="absolute top-6 left-6 bg-black/80 text-white text-xs font-extrabold px-4 py-1.5 rounded-full tracking-widest border border-white/20">WEEK 1 (BEFORE)</span>
+                    </div>
+
+                    <!-- Range Slider Controller -->
+                    <input type="range" id="transformation-range" min="0" max="100" value="50" class="absolute inset-0 w-full h-full opacity-0 z-30 cursor-ew-resize">
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 7: MEMBERSHIP PLANS & BILLING SWITCHER -->
+    <section id="membership" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-brand-volt text-xs font-extrabold uppercase tracking-widest mb-2 block">MEMBERSHIP ACCESS</span>
+                <h2 class="font-impact text-5xl sm:text-7xl uppercase tracking-tight text-white">SELECT YOUR <span class="text-brand-volt">TIER</span></h2>
+                <p class="text-gray-400 text-sm sm:text-base mt-2">Flexible plans. Zero long-term lock-in contracts. Cancel or upgrade anytime with one click.</p>
+                
+                <!-- Billing Toggle Switcher -->
+                <div class="flex items-center justify-center gap-4 mt-8">
+                    <span class="text-sm font-bold text-gray-300">MONTHLY</span>
+                    <button id="billing-toggle" class="w-16 h-8 rounded-full bg-brand-card border border-white/20 p-1 flex items-center transition-colors">
+                        <div id="billing-dot" class="w-6 h-6 rounded-full bg-brand-volt transition-transform"></div>
+                    </button>
+                    <span class="text-sm font-bold text-white flex items-center gap-2">
+                        YEARLY
+                        <span class="bg-brand-orange/20 text-brand-orange text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">SAVE 20%</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Pricing Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Plan 1: Day Pass -->
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 hover:border-white/30 transition-all flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-extrabold text-gray-400 uppercase tracking-widest block mb-2">STARTER PASS</span>
+                        <h3 class="font-impact text-4xl text-white mb-4 uppercase">DAY PASS</h3>
+                        <div class="mb-6">
+                            <span class="font-impact text-6xl text-white price-value" data-monthly="29" data-yearly="24">$29</span>
+                            <span class="text-gray-400 text-xs uppercase font-bold">/ pass</span>
+                        </div>
+                        <ul class="space-y-4 text-xs font-semibold text-gray-300 mb-8">
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Full Single-Day Gym Access</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Locker & Sauna Access</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Free Biometric Scan</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="openCheckoutModal('Day Pass')" class="w-full py-4 rounded-2xl bg-brand-card hover:bg-white hover:text-black text-white font-extrabold text-xs tracking-widest uppercase transition-all border border-white/10">
+                        PURCHASE PASS
+                    </button>
+                </div>
+
+                <!-- Plan 2: Pro Elite (POPULAR GLOWING CARD) -->
+                <div class="glass-panel-glow p-8 rounded-3xl border border-brand-volt relative flex flex-col justify-between transform md:-translate-y-4 shadow-[0_0_50px_rgba(204,255,0,0.15)]">
+                    <span class="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-volt text-black font-extrabold text-[10px] uppercase tracking-widest px-4 py-1 rounded-full shadow-lg">MOST POPULAR</span>
+                    <div>
+                        <span class="text-xs font-extrabold text-brand-volt uppercase tracking-widest block mb-2">FULL ATHLETE</span>
+                        <h3 class="font-impact text-4xl text-white mb-4 uppercase">PRO ELITE</h3>
+                        <div class="mb-6">
+                            <span class="font-impact text-6xl text-brand-volt price-value" data-monthly="89" data-yearly="72">$89</span>
+                            <span class="text-gray-400 text-xs uppercase font-bold">/ month</span>
+                        </div>
+                        <ul class="space-y-4 text-xs font-semibold text-gray-300 mb-8">
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>24/7 Unlimited Gym Access</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Unlimited HIIT & Boxing Classes</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>1-on-1 Monthly Coach Check-in</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Custom Macro Meal Protocol</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="openCheckoutModal('Pro Elite')" class="w-full py-4 rounded-2xl bg-brand-volt text-black font-extrabold text-xs tracking-widest uppercase hover:bg-white hover:shadow-[0_0_30px_rgba(204,255,0,0.8)] transition-all">
+                        CLAIM PRO ELITE
+                    </button>
+                </div>
+
+                <!-- Plan 3: VIP Platinum -->
+                <div class="glass-panel p-8 rounded-3xl border border-white/10 hover:border-white/30 transition-all flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-extrabold text-brand-orange uppercase tracking-widest block mb-2">UNLIMITED BEAST</span>
+                        <h3 class="font-impact text-4xl text-white mb-4 uppercase">VIP PLATINUM</h3>
+                        <div class="mb-6">
+                            <span class="font-impact text-6xl text-white price-value" data-monthly="169" data-yearly="135">$169</span>
+                            <span class="text-gray-400 text-xs uppercase font-bold">/ month</span>
+                        </div>
+                        <ul class="space-y-4 text-xs font-semibold text-gray-300 mb-8">
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Everything in Pro Elite</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Weekly Dedicated Personal Trainer</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Cryotherapy & Ice Bath Recovery</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-volt"></i>
+                                <span>Free Guest Pass Every Month</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="openCheckoutModal('VIP Platinum')" class="w-full py-4 rounded-2xl bg-brand-card hover:bg-white hover:text-black text-white font-extrabold text-xs tracking-widest uppercase transition-all border border-white/10">
+                        GET PLATINUM
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-black border-t border-white/10 py-16 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                <div class="space-y-4">
+                    <a href="#" class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-brand-volt flex items-center justify-center text-black font-impact text-xl font-extrabold">A</div>
+                        <span class="font-impact text-2xl tracking-wider text-white">APEX <span class="text-brand-volt">ATHLETICS</span></span>
+                    </a>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        The world’s premier high-performance physical culture club. Designed for those who demand ultimate mastery over their body.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-impact text-xl text-white mb-4 uppercase tracking-wider">QUICK NAVIGATION</h4>
+                    <ul class="space-y-2 text-xs font-semibold text-gray-400">
+                        <li><a href="#hero" class="hover:text-brand-volt">Home</a></li>
+                        <li><a href="#schedule" class="hover:text-brand-volt">Class Timetable</a></li>
+                        <li><a href="#bmi" class="hover:text-brand-volt">Biometric BMI Calculator</a></li>
+                        <li><a href="#trainers" class="hover:text-brand-volt">Master Coaches</a></li>
+                        <li><a href="#membership" class="hover:text-brand-volt">Membership Plans</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-impact text-xl text-white mb-4 uppercase tracking-wider">FACILITY HOURS</h4>
+                    <ul class="space-y-2 text-xs font-semibold text-gray-400">
+                        <li>Monday - Friday: <span class="text-white">24 Hours Open</span></li>
+                        <li>Saturday: <span class="text-white">24 Hours Open</span></li>
+                        <li>Sunday: <span class="text-white">24 Hours Open</span></li>
+                        <li class="pt-2 text-brand-volt flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4"></i> Biometric Keycard Access</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-impact text-xl text-white mb-4 uppercase tracking-wider">ATHLETE NEWSLETTER</h4>
+                    <p class="text-xs text-gray-400 mb-4">Get weekly nutrition protocols and workout insights straight to your inbox.</p>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="Enter your email" class="bg-brand-card border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-volt w-full">
+                        <button onclick="showToast('Subscribed to Athlete Protocol!', 'success')" class="bg-brand-volt text-black font-extrabold text-xs px-4 rounded-xl hover:bg-white transition-colors uppercase">JOIN</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500">
+                <p>&copy; 2026 APEX ATHLETICS. All Rights Reserved.</p>
+                <div class="flex gap-6 mt-4 sm:mt-0">
+                    <a href="#" class="hover:text-white">Privacy Policy</a>
+                    <a href="#" class="hover:text-white">Terms of Service</a>
+                    <a href="#" class="hover:text-white">Safety Protocols</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE MODAL FOR TRAINER DETAILS & RESERVATION -->
+    <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-panel-glow max-w-xl w-full p-8 rounded-3xl border border-brand-volt/40 relative transform scale-95 transition-transform duration-300" id="modal-content">
+            <button onclick="closeModal()" class="absolute top-6 right-6 p-2 rounded-full bg-white/5 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div id="modal-body">
+                <!-- Dynamically populated JS content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO ATMOSPHERE PLAYER (SYNTHESIZED WEB AUDIO API BEAT) -->
+    <script>
+        // Web Audio API Ambient Sound Generator
+        let audioCtx = null;
+        let isPlaying = false;
+        let oscillator = null;
+
+        document.getElementById('audio-toggle').addEventListener('click', () => {
+            if (!isPlaying) {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Simple low pulsing synth hum for gym hype vibe
+                oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(60, audioCtx.currentTime); // Low bass frequency
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.start();
+
+                isPlaying = true;
+                document.getElementById('audio-status-text').innerText = 'HYPE: ON';
+                showToast('Gym Ambient Atmosphere Activated 🎧', 'info');
+            } else {
+                if (oscillator) {
+                    oscillator.stop();
+                }
+                isPlaying = false;
+                document.getElementById('audio-status-text').innerText = 'HYPE: OFF';
+                showToast('Atmosphere Muted', 'info');
+            }
+        });
+    </script>
+
+    <!-- MAIN JAVASCRIPT APP LOGIC -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // 1. DYNAMIC CANVAS PARTICLES BACKGROUND
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.speedY = (Math.random() - 0.5) * 0.8;
+                this.color = Math.random() > 0.5 ? '#CCFF00' : '#FF5500';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 70; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+
+        // 2. TOAST NOTIFICATION SYSTEM
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let badgeColor = type === 'success' ? 'bg-brand-volt text-black' : 'bg-brand-orange text-white';
+            
+            toast.className = `glass-panel-glow pointer-events-auto p-4 rounded-2xl border border-white/20 flex items-center gap-3 text-xs font-bold text-white shadow-2xl transform translate-y-5 opacity-0 transition-all duration-300`;
+            toast.innerHTML = `
+                <div class="w-2 h-2 rounded-full ${badgeColor} animate-ping"></div>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-5', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-5');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+
+        // 3. BMI LAB CALCULATOR LOGIC
+        const sliderHeight = document.getElementById('slider-height');
+        const sliderWeight = document.getElementById('slider-weight');
+        const sliderAge = document.getElementById('slider-age');
+        
+        const heightVal = document.getElementById('height-val');
+        const weightVal = document.getElementById('weight-val');
+        const ageVal = document.getElementById('age-val');
+        
+        const bmiScore = document.getElementById('bmi-score');
+        const bmiCategory = document.getElementById('bmi-category');
+        const bmiAdvice = document.getElementById('bmi-advice');
+        const bmiGauge = document.getElementById('bmi-gauge');
+        
+        const targetCalories = document.getElementById('target-calories');
+        const targetWater = document.getElementById('target-water');
+
+        let currentActivityFactor = 1.2;
+
+        function updateBMI() {
+            const h = parseFloat(sliderHeight.value) / 100;
+            const w = parseFloat(sliderWeight.value);
+            const age = parseInt(sliderAge.value);
+
+            heightVal.innerText = sliderHeight.value;
+            weightVal.innerText = sliderWeight.value;
+            ageVal.innerText = sliderAge.value;
+
+            const bmi = (w / (h * h)).toFixed(1);
+            bmiScore.innerText = bmi;
+
+            // Calorie Calculation (Mifflin-St Jeor)
+            const bmr = (10 * w) + (6.25 * (h * 100)) - (5 * age) + 5;
+            const tdee = Math.round(bmr * currentActivityFactor);
+            const water = (w * 0.04).toFixed(1);
+
+            targetCalories.innerHTML = `${tdee.toLocaleString()} <span class="text-xs font-sans text-brand-volt">kcal/day</span>`;
+            targetWater.innerHTML = `${water} <span class="text-xs font-sans text-brand-cyan">Liters/day</span>`;
+
+            // Category & Gauge Positioning
+            if (bmi < 18.5) {
+                bmiCategory.innerText = "UNDERWEIGHT / BULK NEEDED";
+                bmiCategory.className = "inline-block px-4 py-1.5 rounded-full bg-brand-cyan/20 text-brand-cyan text-sm font-extrabold uppercase tracking-wider mb-6";
+                bmiAdvice.innerText = "Focus on a structured caloric surplus combined with heavy powerlifting to build lean foundational muscle mass.";
+                bmiGauge.style.width = "20%";
+            } else if (bmi >= 18.5 && bmi <= 24.9) {
+                bmiCategory.innerText = "OPTIMAL ATHLETIC CONDITION";
+                bmiCategory.className = "inline-block px-4 py-1.5 rounded-full bg-brand-volt/20 text-brand-volt text-sm font-extrabold uppercase tracking-wider mb-6";
+                bmiAdvice.innerText = "Your ratio indicates peak athletic baseline conditioning. Ideal for building lean muscle and high-intensity performance.";
+                bmiGauge.style.width = "50%";
+            } else {
+                bmiCategory.innerText = "OVERWEIGHT / FAT SHRED NEEDED";
+                bmiCategory.className = "inline-block px-4 py-1.5 rounded-full bg-brand-orange/20 text-brand-orange text-sm font-extrabold uppercase tracking-wider mb-6";
+                bmiAdvice.innerText = "Focus on high-intensity metabolic conditioning (HIIT) paired with a high-protein caloric deficit protocol.";
+                bmiGauge.style.width = "85%";
+            }
+        }
+
+        sliderHeight.addEventListener('input', updateBMI);
+        sliderWeight.addEventListener('input', updateBMI);
+        sliderAge.addEventListener('input', updateBMI);
+
+        document.querySelectorAll('.activity-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.activity-btn').forEach(b => {
+                    b.className = "activity-btn border border-white/10 text-gray-400 p-3 rounded-xl font-bold text-xs uppercase hover:border-white/30";
+                });
+                e.target.className = "activity-btn active border border-brand-volt bg-brand-volt/10 text-brand-volt p-3 rounded-xl font-bold text-xs uppercase";
+                currentActivityFactor = parseFloat(e.target.dataset.factor);
+                updateBMI();
+            });
+        });
+
+        updateBMI();
+
+
+        // 4. CLASS SCHEDULE DATA & INTERACTIVE RENDER
+        const scheduleData = [
+            { id: 1, day: 'mon', name: 'HYPER-HIIT FAT BURN', time: '07:00 AM - 08:00 AM', trainer: 'Elena Rostova', cat: 'hiit', room: 'Studio Alpha', spots: 4 },
+            { id: 2, day: 'mon', name: 'RAW POWERLIFTING 101', time: '10:00 AM - 11:30 AM', trainer: 'Marcus Vance', cat: 'power', room: 'Iron Vault', spots: 2 },
+            { id: 3, day: 'mon', name: 'STRIKING BOXING PROTOCOL', time: '05:30 PM - 06:45 PM', trainer: 'Jaxson Croft', cat: 'boxing', room: 'Combat Ring', spots: 6 },
+            
+            { id: 4, day: 'tue', name: 'METABOLIC CONDITIONING', time: '08:00 AM - 09:00 AM', trainer: 'Elena Rostova', cat: 'hiit', room: 'Studio Alpha', spots: 8 },
+            { id: 5, day: 'tue', name: 'HEAVY SQUAT & BENCH CLINIC', time: '04:00 PM - 05:30 PM', trainer: 'Marcus Vance', cat: 'power', room: 'Iron Vault', spots: 1 },
+            
+            { id: 6, day: 'wed', name: 'SHADOW BOXING & REFLEX', time: '07:30 AM - 08:45 AM', trainer: 'Jaxson Croft', cat: 'boxing', room: 'Combat Ring', spots: 5 },
+            { id: 7, day: 'wed', name: 'CORE HYPERTROPHY BURN', time: '06:00 PM - 07:00 PM', trainer: 'Elena Rostova', cat: 'hiit', room: 'Studio Alpha', spots: 3 },
+            
+            { id: 8, day: 'thu', name: 'DEADLIFT MASTERY', time: '09:00 AM - 10:30 AM', trainer: 'Marcus Vance', cat: 'power', room: 'Iron Vault', spots: 2 },
+            { id: 9, day: 'fri', name: 'COMBAT SPARRING INTENSIVE', time: '05:00 PM - 06:30 PM', trainer: 'Jaxson Croft', cat: 'boxing', room: 'Combat Ring', spots: 4 },
+            { id: 10, day: 'sat', name: 'FULL BODY BEAST REBUILD', time: '10:00 AM - 11:30 AM', trainer: 'Marcus Vance', cat: 'hiit', room: 'Main Arena', spots: 10 }
+        ];
+
+        let activeDay = 'mon';
+        let activeCat = 'all';
+
+        function renderSchedule() {
+            const grid = document.getElementById('schedule-grid');
+            grid.innerHTML = '';
+
+            const filtered = scheduleData.filter(item => {
+                const matchDay = item.day === activeDay;
+                const matchCat = activeCat === 'all' || item.cat === activeCat;
+                return matchDay && matchCat;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-12 glass-panel rounded-3xl border border-white/5">
+                        <i data-lucide="calendar-x" class="w-12 h-12 text-gray-500 mx-auto mb-3"></i>
+                        <p class="text-gray-400 font-bold text-sm">NO CLASSES SCHEDULED FOR THIS FILTER CATEGORY.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "glass-panel p-6 rounded-3xl border border-white/10 hover:border-brand-volt transition-all flex flex-col justify-between group";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[10px] font-extrabold tracking-widest px-3 py-1 rounded-full bg-brand-volt/10 text-brand-volt uppercase">${c.cat.toUpperCase()}</span>
+                            <span class="text-xs text-gray-400 font-semibold flex items-center gap-1"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-brand-orange"></i> ${c.room}</span>
+                        </div>
+                        <h4 class="font-impact text-2xl text-white mb-2 group-hover:text-brand-volt transition-colors">${c.name}</h4>
+                        <p class="text-xs text-gray-300 font-bold mb-4 flex items-center gap-2">
+                            <i data-lucide="clock" class="w-4 h-4 text-brand-cyan"></i> ${c.time}
+                        </p>
+                    </div>
+                    <div class="border-t border-white/5 pt-4 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-gray-400 block font-bold">COACH</span>
+                            <span class="text-xs font-bold text-white">${c.trainer}</span>
+                        </div>
+                        <button onclick="reserveClass('${c.name}', '${c.time}')" class="px-4 py-2 rounded-xl bg-brand-volt text-black font-extrabold text-xs uppercase tracking-wider hover:bg-white transition-all">
+                            RESERVE (${c.spots} LEFT)
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // Day Tabs Switcher
+        document.querySelectorAll('.day-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.day-tab').forEach(t => {
+                    t.className = "day-tab px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card/50 border border-white/5 text-gray-400 hover:text-white flex-shrink-0";
+                });
+                const target = e.currentTarget;
+                target.className = "day-tab active px-6 py-3 rounded-xl font-impact text-xl tracking-wider uppercase bg-brand-card border border-brand-volt text-brand-volt flex-shrink-0";
+                activeDay = target.dataset.day;
+                renderSchedule();
+            });
+        });
+
+        // Category Filters Switcher
+        document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.cat-filter-btn').forEach(b => {
+                    b.className = "cat-filter-btn px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider glass-panel text-gray-300 hover:text-white transition-all";
+                });
+                const target = e.currentTarget;
+                target.className = "cat-filter-btn active px-4 py-2 rounded-full text-xs font-extrabold uppercase tracking-wider bg-brand-volt text-black transition-all";
+                activeCat = target.dataset.cat;
+                renderSchedule();
+            });
+        });
+
+        renderSchedule();
+
+        function reserveClass(className, time) {
+            showToast(`Reserved seat for ${className} at ${time}!`, 'success');
+        }
+
+
+        // 5. MACRO PLANNER SWITCHER LOGIC
+        const macroGoals = {
+            muscle: { p: 40, c: 40, f: 20, pG: '220g', cG: '220g', fG: '50g' },
+            shred: { p: 50, c: 20, f: 30, pG: '260g', cG: '100g', fG: '65g' },
+            endurance: { p: 25, c: 60, f: 15, pG: '140g', cG: '340g', fG: '40g' }
+        };
+
+        document.querySelectorAll('.macro-goal-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                document.querySelectorAll('.macro-goal-btn').forEach(b => {
+                    b.className = "macro-goal-btn w-full p-4 rounded-2xl glass-panel border border-white/5 text-left flex items-center justify-between hover:border-white/20";
+                });
+                target.className = "macro-goal-btn active w-full p-4 rounded-2xl glass-panel border border-brand-volt text-left flex items-center justify-between";
+
+                const goalKey = target.dataset.goal;
+                const data = macroGoals[goalKey];
+
+                document.getElementById('bar-protein').style.width = data.p + '%';
+                document.getElementById('bar-carbs').style.width = data.c + '%';
+                document.getElementById('bar-fats').style.width = data.f + '%';
+
+                document.getElementById('val-protein').innerText = data.p + '%';
+                document.getElementById('val-carbs').innerText = data.c + '%';
+                document.getElementById('val-fats').innerText = data.f + '%';
+
+                document.getElementById('gram-protein').innerText = data.pG + ' / day';
+                document.getElementById('gram-carbs').innerText = data.cG + ' / day';
+                document.getElementById('gram-fats').innerText = data.fG + ' / day';
+
+                showToast(`Macro Ratio Updated for ${goalKey.toUpperCase()}!`, 'info');
+            });
+        });
+
+
+        // 6. BEFORE & AFTER TRANSFORMATION SLIDER LOGIC
+        const transformationRange = document.getElementById('transformation-range');
+        const beforeImageWrap = document.getElementById('before-image-wrap');
+
+        if (transformationRange && beforeImageWrap) {
+            transformationRange.addEventListener('input', (e) => {
+                beforeImageWrap.style.width = `${e.target.value}%`;
+            });
+        }
+
+
+        // 7. MEMBERSHIP BILLING TOGGLE SWITCHER
+        const billingToggle = document.getElementById('billing-toggle');
+        const billingDot = document.getElementById('billing-dot');
+        let isYearly = false;
+
+        billingToggle.addEventListener('click', () => {
+            isYearly = !isYearly;
+            if (isYearly) {
+                billingDot.style.transform = 'translateX(32px)';
+                showToast('Switched to Yearly Billing (20% Savings Applied)', 'success');
+            } else {
+                billingDot.style.transform = 'translateX(0px)';
+            }
+
+            document.querySelectorAll('.price-value').forEach(el => {
+                const val = isYearly ? el.dataset.yearly : el.dataset.monthly;
+                el.innerText = '$' + val;
+            });
+        });
+
+
+        // 8. MODAL WINDOW SYSTEM
+        const modalContainer = document.getElementById('modal-container');
+        const modalContent = document.getElementById('modal-content');
+        const modalBody = document.getElementById('modal-body');
+
+        function openTrainerModal(name, role, cert, img) {
+            modalBody.innerHTML = `
+                <div class="flex flex-col sm:flex-row gap-6 items-center mb-6">
+                    <img src="${img}" class="w-28 h-28 rounded-2xl object-cover border border-brand-volt">
+                    <div>
+                        <span class="text-xs text-brand-volt font-bold uppercase tracking-widest">${role}</span>
+                        <h3 class="font-impact text-4xl text-white uppercase">${name}</h3>
+                        <p class="text-xs text-gray-400 font-semibold mt-1">${cert}</p>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-300 leading-relaxed mb-6">
+                    Book a private 1-on-1 athletic evaluation and biometric movement screening. Designed to identify muscular imbalances and maximize power output.
+                </p>
+                <div class="space-y-3">
+                    <button onclick="showToast('Private Session Booked with ${name}!', 'success'); closeModal();" class="w-full py-3.5 rounded-2xl bg-brand-volt text-black font-extrabold text-xs uppercase tracking-widest hover:bg-white transition-all">
+                        BOOK PRIVATE 1-ON-1 EVALUATION ($75)
+                    </button>
+                </div>
+            `;
+            modalContainer.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+            lucide.createIcons();
+        }
+
+        function openCheckoutModal(planName) {
+            modalBody.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="w-12 h-12 rounded-full bg-brand-volt/20 text-brand-volt mx-auto flex items-center justify-center mb-3">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xs text-brand-volt font-bold uppercase tracking-widest">MEMBERSHIP CHECKOUT</span>
+                    <h3 class="font-impact text-4xl text-white uppercase">${planName}</h3>
+                </div>
+                <div class="space-y-4 mb-6">
+                    <input type="text" placeholder="Full Athlete Name" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-volt">
+                    <input type="email" placeholder="Email Address" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-volt">
+                </div>
+                <button onclick="showToast('Welcome to Apex Athletics! Confirmation email sent.', 'success'); closeModal();" class="w-full py-4 rounded-2xl bg-brand-volt text-black font-extrabold text-xs uppercase tracking-widest hover:bg-white transition-all shadow-[0_0_25px_rgba(204,255,0,0.5)]">
+                    CONFIRM & ACCESS FACILITY
+                </button>
+            `;
+            modalContainer.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            modalContainer.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+
+
+        // 9. GSAP ANIMATIONS & STATS COUNTER TRIGGER
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Stats Counters Animation
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            gsap.to(counter, {
+                innerText: target,
+                duration: 2.5,
+                snap: { innerText: 1 },
+                scrollTrigger: {
+                    trigger: counter,
+                    start: 'top 85%'
+                }
+            });
+        });
+
+        // Trainer Cards Scroll Animation
+        gsap.from('.trainer-card', {
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            scrollTrigger: {
+                trigger: '#trainers',
+                start: 'top 75%'
+            }
+        });
+
+        // Mobile Menu Drawer Toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.mobile-link').forEach(l => {
+            l.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+    </script>
+</body>
+</html>
